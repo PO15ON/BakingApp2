@@ -39,7 +39,7 @@
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <provider
-            android:name="com.example.ahmed.bakingapp.database.WidgetProvider"
+            android:name="com.example.ahmed.bakingapp.WidgetProvider"
             android:authorities="com.example.ahmed.bakingapp.database"
             android:exported="false" />
     </application>
