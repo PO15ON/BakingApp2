@@ -22,7 +22,7 @@ import static com.example.ahmed.bakingapp.IngredientsWidget.TAG;
 public class GridWidgetService extends RemoteViewsService {
     @Override
     public WidgetRemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new WidgetRemoteViewsFactory(this.getApplicationContext(), intent);
+        return new WidgetRemoteViewsFactory(this.getApplicationContext());
     }
 }
 
@@ -32,7 +32,7 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     Cursor cursor;
 
 
-    public WidgetRemoteViewsFactory(Context context, Intent intent) {
+    public WidgetRemoteViewsFactory(Context context) {
         mContext = context;
     }
 
@@ -43,11 +43,6 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     @Override
     public void onDataSetChanged() {
 
-        if (cursor != null) {
-            cursor.close();
-        }
-
-        final long identityToken = Binder.clearCallingIdentity();
         Uri uri = TableColumns.CONTENT_URI;
         cursor = mContext.getContentResolver().query(uri,
                 null,
@@ -55,34 +50,29 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
                 null,
                 null);
 
-        Binder.restoreCallingIdentity(identityToken);
     }
 
     @Override
     public void onDestroy() {
-        if (cursor != null) {
-            cursor.close();
-        }
+        if(cursor != null) cursor.close();
     }
 
     @Override
     public int getCount() {
-        Log.d("count", "getCount: " + cursor.getCount());
         return cursor == null ? 0 : cursor.getCount();
     }
 
     @Override
     public RemoteViews getViewAt(int i) {
 
-        if (i == AdapterView.INVALID_POSITION ||
-                cursor == null || !cursor.moveToPosition(i)) {
+        if (cursor == null || cursor.getCount() == 0) {
             Log.d("error", "getViewAt: Error");
             return null;
         }
 
         // FIXME: 04/06/18 
-        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget_list_item);
         cursor.moveToPosition(i);
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget_list_item);
         String text = cursor.getString(cursor.getColumnIndex(TableColumns.COLUMN_RECIPE));
 //        Log.d("widget", "getViewAt: text = " + text);
         Log.d(TAG, "getViewAt: cur = " + cursor.getPosition());

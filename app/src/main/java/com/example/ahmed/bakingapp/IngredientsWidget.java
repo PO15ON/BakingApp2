@@ -33,9 +33,10 @@ public class IngredientsWidget extends AppWidgetProvider {
 
 //        views.setTextViewText(R.id.widgetItemTaskNameLabel, names.get(0));
         Log.d(TAG, "updateAppWidget: name = " + names.toString());
-//        Intent appIntent = new Intent(context, DetailsActivity.class);
-//        PendingIntent appPendingIntent = PendingIntent.getActivity(context, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent appIntent = new Intent(context, DetailsActivity.class);
+        PendingIntent appPendingIntent = PendingIntent.getActivity(context, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 //        views.setOnClickPendingIntent(R.id.widgetItemTaskNameLabel, appPendingIntent);
+        views.setPendingIntentTemplate(R.id.widgetListView, appPendingIntent);
 
 
         // Instruct the widget manager to update the widget
@@ -44,12 +45,11 @@ public class IngredientsWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        UpdateWidgetService.startActionFoo(context);
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
     public static void updateWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, ArrayList<String> names) {
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, names);
         }
     }
 
