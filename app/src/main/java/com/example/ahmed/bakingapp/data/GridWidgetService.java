@@ -1,5 +1,6 @@
 package com.example.ahmed.bakingapp.data;
 
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,13 +13,16 @@ import android.widget.RemoteViewsService;
 
 import com.example.ahmed.bakingapp.IngredientsWidget;
 import com.example.ahmed.bakingapp.R;
-import com.example.ahmed.bakingapp.database.Columns;
-import com.example.ahmed.bakingapp.database.WidgetProvider;
+import com.example.ahmed.bakingapp.database.RecipeContentProvider;
+import com.example.ahmed.bakingapp.database.RecipeContract;
+import com.example.ahmed.bakingapp.database.RecipeContract.TableColumns;
+
+import static com.example.ahmed.bakingapp.IngredientsWidget.TAG;
 
 public class GridWidgetService extends RemoteViewsService {
     @Override
-    public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new WidgetRemoteViewsFactory(this.getApplicationContext());
+    public WidgetRemoteViewsFactory onGetViewFactory(Intent intent) {
+        return new WidgetRemoteViewsFactory(this.getApplicationContext(), intent);
     }
 }
 
@@ -28,7 +32,7 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     Cursor cursor;
 
 
-    public WidgetRemoteViewsFactory(Context context) {
+    public WidgetRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
     }
 
@@ -38,17 +42,18 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public void onDataSetChanged() {
+
         if (cursor != null) {
             cursor.close();
         }
 
         final long identityToken = Binder.clearCallingIdentity();
-        Uri uri = WidgetProvider.Table.CONTENT_URI;
+        Uri uri = TableColumns.CONTENT_URI;
         cursor = mContext.getContentResolver().query(uri,
                 null,
                 null,
                 null,
-                Columns._ID + " DESC");
+                null);
 
         Binder.restoreCallingIdentity(identityToken);
     }
@@ -62,6 +67,7 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public int getCount() {
+        Log.d("count", "getCount: " + cursor.getCount());
         return cursor == null ? 0 : cursor.getCount();
     }
 
@@ -70,13 +76,17 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
         if (i == AdapterView.INVALID_POSITION ||
                 cursor == null || !cursor.moveToPosition(i)) {
+            Log.d("error", "getViewAt: Error");
             return null;
         }
 
-        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.item_recycler_list);
-        String text = cursor.getString(1);
-        views.setTextViewText(R.id.recipe_card, text);
-        Log.d(IngredientsWidget.TAG, "getViewAt: ");
+        // FIXME: 04/06/18 
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget_list_item);
+        cursor.moveToPosition(i);
+        String text = cursor.getString(cursor.getColumnIndex(TableColumns.COLUMN_RECIPE));
+//        Log.d("widget", "getViewAt: text = " + text);
+        Log.d(TAG, "getViewAt: cur = " + cursor.getPosition());
+        views.setTextViewText(R.id.widgetItemTaskNameLabel, text);
 
         return views;
     }
@@ -93,11 +103,11 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public long getItemId(int i) {
-        return cursor.moveToPosition(i) ? cursor.getLong(0) : i;
+        return cursor.moveToPosition(i) ? cursor.getLong(1) : i;
     }
 
     @Override
     public boolean hasStableIds() {
-        return true;
+        return false;
     }
 }
