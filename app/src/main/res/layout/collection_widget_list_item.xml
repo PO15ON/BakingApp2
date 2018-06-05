@@ -1,0 +1,6 @@
+<TextView android:id="@+id/widgetItemTaskNameLabel"
+    android:layout_width="match_parent"
+    android:gravity="start"
+    android:layout_gravity="center_vertical"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
