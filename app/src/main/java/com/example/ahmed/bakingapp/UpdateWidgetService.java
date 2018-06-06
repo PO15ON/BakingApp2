@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.example.ahmed.bakingapp.data.GridWidgetService;
 import com.example.ahmed.bakingapp.database.RecipeContract;
 
 import java.util.ArrayList;
@@ -29,14 +28,6 @@ public class UpdateWidgetService extends IntentService {
         super("UpdateWidgetService");
     }
 
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        names = new ArrayList<>();
-    }
-
     /**
      * Starts this service to perform action Foo with the given parameters. If
      * the service is already performing a task this action will be queued.
@@ -44,7 +35,7 @@ public class UpdateWidgetService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionFoo(Context context) {
+    public static void startActionRecipes(Context context) {
         Intent intent = new Intent(context, UpdateWidgetService.class);
         intent.setAction(ACTION_UPDATE_WIDGET);
         context.startService(intent);
@@ -56,7 +47,7 @@ public class UpdateWidgetService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_UPDATE_WIDGET.equals(action)) {
-                handleActionFoo();
+                handleActionRecipes();
             }
         }
     }
@@ -65,7 +56,9 @@ public class UpdateWidgetService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionFoo() {
+    private void handleActionRecipes() {
+        names = new ArrayList<>();
+
         Cursor cursor = getContentResolver().query(RecipeContract.TableColumns.CONTENT_URI,
                 null,
                 null,

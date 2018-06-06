@@ -44,11 +44,12 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     public void onDataSetChanged() {
 
         Uri uri = TableColumns.CONTENT_URI;
+        if(cursor != null) cursor.close();
         cursor = mContext.getContentResolver().query(uri,
                 null,
                 null,
                 null,
-                null);
+                TableColumns._ID);
 
     }
 
@@ -72,10 +73,9 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
         // FIXME: 04/06/18 
         cursor.moveToPosition(i);
-        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget_list_item);
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget);
         String text = cursor.getString(cursor.getColumnIndex(TableColumns.COLUMN_RECIPE));
 //        Log.d("widget", "getViewAt: text = " + text);
-        Log.d(TAG, "getViewAt: cur = " + cursor.getPosition());
         views.setTextViewText(R.id.widgetItemTaskNameLabel, text);
 
         return views;
@@ -93,11 +93,11 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public long getItemId(int i) {
-        return cursor.moveToPosition(i) ? cursor.getLong(1) : i;
+        return i;
     }
 
     @Override
     public boolean hasStableIds() {
-        return false;
+        return true;
     }
 }

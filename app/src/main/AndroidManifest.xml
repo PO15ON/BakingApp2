@@ -41,7 +41,7 @@
         <provider
             android:name=".database.RecipeContentProvider"
             android:authorities="com.example.ahmed.bakingapp"
-            android:exported="false" />
+            android:exported="true" />
 
         <service android:name=".UpdateWidgetService"/>
     </application>
