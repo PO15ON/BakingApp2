@@ -73,7 +73,7 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
         // FIXME: 04/06/18 
         cursor.moveToPosition(i);
-        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget);
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget); //TODO: change this layout to collection_widget_item_list
         String text = cursor.getString(cursor.getColumnIndex(TableColumns.COLUMN_RECIPE));
 //        Log.d("widget", "getViewAt: text = " + text);
         views.setTextViewText(R.id.widgetItemTaskNameLabel, text);
