@@ -13,6 +13,8 @@ import com.example.ahmed.bakingapp.data.Ingredient;
 
 import java.util.ArrayList;
 
+import static com.example.ahmed.bakingapp.MainActivity.stepsList;
+
 public class RecipeDetailsFragment extends Fragment {
 
     private ArrayList<Ingredient> modelList;
@@ -28,7 +30,10 @@ public class RecipeDetailsFragment extends Fragment {
 
         GridView gridView = rootView.findViewById(R.id.details_grid_view);
 
-        modelList = MainActivity.stepsList.getIngredients();
+        if (getActivity().getIntent().getIntExtra("index", -1) != -1)
+            stepsList = MainActivity.modelListAll.get(getActivity().getIntent().getIntExtra("index", -1));
+        modelList = stepsList.getIngredients();
+
         MasterListAdapter mAdapter = new MasterListAdapter(getContext(), modelList);
         mAdapter.updateList(modelList);
         gridView.setAdapter(mAdapter);

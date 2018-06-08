@@ -225,4 +225,3 @@ public class Main2Activity extends AppCompatActivity {
     }
 }
 // TODO: 4/12/2018 Espresso
-// TODO: 4/12/2018 widget

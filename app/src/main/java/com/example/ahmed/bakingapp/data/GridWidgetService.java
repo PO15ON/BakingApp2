@@ -1,23 +1,19 @@
 package com.example.ahmed.bakingapp.data;
 
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Binder;
 import android.util.Log;
-import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import com.example.ahmed.bakingapp.IngredientsWidget;
 import com.example.ahmed.bakingapp.R;
-import com.example.ahmed.bakingapp.database.RecipeContentProvider;
-import com.example.ahmed.bakingapp.database.RecipeContract;
 import com.example.ahmed.bakingapp.database.RecipeContract.TableColumns;
 
-import static com.example.ahmed.bakingapp.IngredientsWidget.TAG;
+import java.util.ArrayList;
+
+import static com.example.ahmed.bakingapp.MainActivity.modelListAll;
 
 public class GridWidgetService extends RemoteViewsService {
     @Override
@@ -71,12 +67,35 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
             return null;
         }
 
-        // FIXME: 04/06/18 
         cursor.moveToPosition(i);
-        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget); //TODO: change this layout to collection_widget_item_list
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.collection_widget_list_item);
         String text = cursor.getString(cursor.getColumnIndex(TableColumns.COLUMN_RECIPE));
-//        Log.d("widget", "getViewAt: text = " + text);
+        Log.d("widget", "getViewAt: text = " + text);
         views.setTextViewText(R.id.widgetItemTaskNameLabel, text);
+
+//        Log.d(TAG, "getViewAt: " + modelListAll.contains(text));
+//        Log.d(TAG, "getViewAt: modelListAll = " + modelListAll.get(modelListAll.indexOf(text)));
+        int size = modelListAll.size();
+        String title = null;
+        ArrayList<Ingredient> ingredients = null;
+        int index = 0;
+
+        for (int in = 0; in < size; in++) {
+            if (modelListAll.get(in).getTitle().equals(text)) {
+                title = modelListAll.get(in).getTitle();
+                ingredients = modelListAll.get(in).getIngredients();
+                index = in;
+
+            }
+        }
+
+        Intent intent = new Intent();
+
+        intent.putExtra("title", title);
+        intent.putExtra("ingredients", ingredients);
+        intent.putExtra("index", index);
+
+        views.setOnClickFillInIntent(R.id.widgetItemTaskNameLabel, intent);
 
         return views;
     }

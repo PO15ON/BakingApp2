@@ -7,7 +7,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.RemoteViews;
 
 import com.example.ahmed.bakingapp.data.GridWidgetService;
@@ -19,30 +18,34 @@ import java.util.ArrayList;
  */
 public class IngredientsWidget extends AppWidgetProvider {
     public static final String TAG = "widget";
-    static ArrayList<AbstractModel> modelList;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, ArrayList<String> names) {
+                                int appWidgetId) {
         Log.d(TAG, "updateAppWidget: ");
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.collection_widget);
         Intent intent = new Intent(context, GridWidgetService.class);
         views.setRemoteAdapter(R.id.widgetListView, intent);
 
+        Intent appIntent = new Intent(context, DetailsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        views.setPendingIntentTemplate(R.id.widgetListView, pendingIntent);
+
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
+    }
+
+    public static void updateWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, ArrayList<String> names) {
+        for (int appWidgetId : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId);
+        }
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         UpdateWidgetService.startActionRecipes(context);
-        sendRefreshBroadcast(context);
-    }
-
-    public static void updateWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, ArrayList<String> names) {
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, names);
-        }
+//        sendRefreshBroadcast(context);
     }
 
     public static void sendRefreshBroadcast(Context context) {

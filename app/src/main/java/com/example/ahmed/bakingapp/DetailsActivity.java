@@ -20,7 +20,9 @@ public class DetailsActivity extends AppCompatActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipe_details_fragment);
-        name = getIntent().getStringExtra("name");
+        name = getIntent().getStringExtra("title");
+
+
         setTitle(name);
 
         mTwoPanel = findViewById(R.id.linear_layout2) != null;

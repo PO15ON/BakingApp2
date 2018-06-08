@@ -4,6 +4,10 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -13,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
+import com.example.ahmed.bakingapp.IdlingResource.SimpleIdlingResource;
 import com.example.ahmed.bakingapp.data.Datum;
 import com.example.ahmed.bakingapp.data.Ingredient;
 import com.example.ahmed.bakingapp.data.Step;
@@ -41,10 +46,24 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerViewAdapter mAdapter;
     private boolean mTwoPane;
 
+
+    @Nullable
+    SimpleIdlingResource idlingResource;
+
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (idlingResource == null) {
+            idlingResource = new SimpleIdlingResource();
+        }
+        return idlingResource;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         modelListAll = new ArrayList<>();
 
@@ -131,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 listId = position;
                 stepsList = model;
                 try {
-                    intent.putExtra("name", model.getTitle());
+                    intent.putExtra("title", model.getTitle());
                     intent.putExtra("ingredients", model.getIngredients());
                     intent.putExtra("steps", model.getSteps());
                     Log.d(TAG, "onItemClick: " + model.getTitle());

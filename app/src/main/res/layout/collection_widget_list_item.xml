@@ -1,4 +1,5 @@
 <TextView android:id="@+id/widgetItemTaskNameLabel"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="40dp"
+    android:textColor="@android:color/black"
     xmlns:android="http://schemas.android.com/apk/res/android" />
