@@ -78,6 +78,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @VisibleForTesting
+    public static Bundle createResultData() {
+
+        String description, shortDescription, videoUrl, name;
+        int stepId, length;
+//        ArrayList<Step> modelList = stepsList.getSteps();
+
+        description = "Recipe Introduction";
+        shortDescription = "Recipe Introduction";
+        stepId = 0;
+        videoUrl = "https://d17h27t6h515a5.cloudfront.net/topher/2017/April/58ffd974_-intro-creampie/-intro-creampie.mp4";
+        name = "Nutella Pie";
+        length = 7;
+
+        Bundle bundle = new Bundle();
+
+        bundle.putString("short", shortDescription);
+        bundle.putString("description", description);
+        bundle.putString("video", videoUrl);
+        bundle.putInt("stepId", stepId);
+        bundle.putString("name", name);
+        bundle.putInt("length", length);
+
+        return bundle;
+    }
+
     private void setAdapter() {
 
         mAdapter = new RecyclerViewAdapter(MainActivity.this, modelListAll);
@@ -110,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 IngredientsWidget.sendRefreshBroadcast(MainActivity.this);
+//                Log.d("stepps", "onResponse: " + modelListAll.get(0).getSteps().get(0).);
 
             }
 
@@ -166,6 +193,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
 }

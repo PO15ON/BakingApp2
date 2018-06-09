@@ -34,6 +34,7 @@ import butterknife.OnClick;
 
 public class Main2Activity extends AppCompatActivity {
 
+    private static final String POSITION = "position";
     @BindView(R.id.player_view)
     SimpleExoPlayerView mPlayerView;
     @BindView(R.id.previous_btn)
@@ -59,6 +60,10 @@ public class Main2Activity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        if (savedInstanceState != null) {
+            seekTo = savedInstanceState.getLong(POSITION);
+        }
+
         modelList = MainActivity.modelListAll;
 //        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
 
@@ -67,11 +72,17 @@ public class Main2Activity extends AppCompatActivity {
         description = bundle.getString("description");
         shortDescription = bundle.getString("short");
         stepId = bundle.getInt("stepId");
-        videoUrl = modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL();
+        if (modelList != null)
+            videoUrl = modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL();
+        else
+            videoUrl = bundle.getString("video");
         name = bundle.getString("name");
         length = bundle.getInt("length");
 
-        Log.d("modelList", "onCreate: modelList = " + modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL());
+        Log.d("testing", "onCreate: desc = " + description + "\nshort = " + shortDescription +
+                "\nstepId = " + stepId + "\nvideo = " + videoUrl + "\nname = " + name + "\nlength = " + length);
+
+//        Log.d("modelList", "onCreate: modelList = " + modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL());
 
         Log.d("video", "onCreate: video = " + videoUrl);
         setTitle(shortDescription + " - " + name);
@@ -119,8 +130,15 @@ public class Main2Activity extends AppCompatActivity {
 
         updateBtns();
 
-        descTxt.setText(modelList.get(MainActivity.listId).getSteps().get(stepId).getDescription());
-        videoUrl = modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL();
+        if (modelList != null) {
+            videoUrl = modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL();
+            description = modelList.get(MainActivity.listId).getSteps().get(stepId).getDescription();
+        } else { // hardcoded for testing
+            description = "Recipe Introduction";
+            videoUrl = "https://d17h27t6h515a5.cloudfront.net/topher/2017/April/58ffd974_-intro-creampie/-intro-creampie.mp4";
+        }
+        descTxt.setText(description);
+
         releasePlayer();
         initializePlayer(Uri.parse(videoUrl));
 
@@ -192,18 +210,20 @@ public class Main2Activity extends AppCompatActivity {
 
     private void releasePlayer() {
         if (mExoPlayer != null) {
-            seekTo = mExoPlayer.getCurrentPosition();
+//            seekTo = mExoPlayer.getCurrentPosition();
             mExoPlayer.release();
             mExoPlayer = null;
-            seekTo = 0;
+//            seekTo = 0;
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mExoPlayer != null)
+        if (mExoPlayer != null) {
+            outState.putLong(POSITION, mExoPlayer.getCurrentPosition());
             seekTo = mExoPlayer.getCurrentPosition();
+        }
     }
 
     @Override
@@ -218,10 +238,12 @@ public class Main2Activity extends AppCompatActivity {
             params.height = ViewGroup.LayoutParams.MATCH_PARENT;
 
             mPlayerView.setLayoutParams(params);
-        } else {
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             params.width = ViewGroup.LayoutParams.MATCH_PARENT;
             params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
     }
+
+
 }
 // TODO: 4/12/2018 Espresso

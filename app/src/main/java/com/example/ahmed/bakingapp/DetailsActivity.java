@@ -34,4 +34,6 @@ public class DetailsActivity extends AppCompatActivity {
 //        Log.d("video", "onCreate: video(details) = " + steps.get(MainActivity.listId).getVideoURL());
 
     }
+
+
 }
