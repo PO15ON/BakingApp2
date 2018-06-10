@@ -1,26 +1,28 @@
 package com.example.ahmed.bakingapp;
 
 import android.annotation.SuppressLint;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -32,9 +34,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class Main2Activity extends AppCompatActivity {
+public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventListener {
 
     private static final String POSITION = "position";
+    private static final String TAG = "seekToo";
     @BindView(R.id.player_view)
     SimpleExoPlayerView mPlayerView;
     @BindView(R.id.previous_btn)
@@ -48,8 +51,10 @@ public class Main2Activity extends AppCompatActivity {
     SimpleExoPlayer mExoPlayer;
 
     String description, shortDescription, videoUrl, name;
-    int stepId, length;
-    long seekTo = 0;
+    int stepId, length, exoIndex;
+    long seekTo;
+    boolean playWhenReady = true;
+    Bundle seekBundle;
 
     private ArrayList<AbstractModel> modelList;
 
@@ -60,8 +65,11 @@ public class Main2Activity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        seekBundle = new Bundle();
+        seekTo = seekBundle.getLong(POSITION, 0);
         if (savedInstanceState != null) {
             seekTo = savedInstanceState.getLong(POSITION);
+            Log.d(TAG, "onCreate: " + seekTo);
         }
 
         modelList = MainActivity.modelListAll;
@@ -155,6 +163,7 @@ public class Main2Activity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume: " + seekTo);
         hideSystemUi();
         if ((Util.SDK_INT <= 23 || mExoPlayer == null)) {
             initializePlayer(Uri.parse(videoUrl));
@@ -179,7 +188,8 @@ public class Main2Activity extends AppCompatActivity {
 
     @SuppressLint("InlinedApi")
     private void hideSystemUi() {
-        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+        if(findViewById(R.id.layout_land_scape) != null)
+            mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -194,26 +204,30 @@ public class Main2Activity extends AppCompatActivity {
         }
         if (mExoPlayer == null) {
             // Create an instance of the ExoPlayer.
+            Log.d(TAG, "initializePlayer: " + seekTo);
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
             mPlayerView.setPlayer(mExoPlayer);
+
+            mExoPlayer.addListener(this);
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(this, "BakingApp");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     this, userAgent), new DefaultExtractorsFactory(), null, null);
-            mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
             mExoPlayer.seekTo(seekTo);
+            mExoPlayer.prepare(mediaSource, false, false);
+            mExoPlayer.setPlayWhenReady(playWhenReady);
         }
     }
 
     private void releasePlayer() {
         if (mExoPlayer != null) {
-//            seekTo = mExoPlayer.getCurrentPosition();
+            seekTo = mExoPlayer.getCurrentPosition();
+            Log.d(TAG, "releasePlayer: " + seekTo);
+            seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
             mExoPlayer.release();
             mExoPlayer = null;
-//            seekTo = 0;
         }
     }
 
@@ -222,28 +236,60 @@ public class Main2Activity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         if (mExoPlayer != null) {
             outState.putLong(POSITION, mExoPlayer.getCurrentPosition());
-            seekTo = mExoPlayer.getCurrentPosition();
+            Log.d(TAG, "onSaveInstanceState: " + seekTo);
+            seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
         }
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mPlayerView.getLayoutParams();
-
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-
-            mPlayerView.setLayoutParams(params);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            seekTo = savedInstanceState.getLong(POSITION);
+            Log.d(TAG, "onRestoreInstanceState: " + seekTo);
         }
     }
 
 
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//        seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
+//        releasePlayer();
+//    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
+            Log.d(TAG, "onPlayerStateChanged: PLAYING");
+        } else if((playbackState == ExoPlayer.STATE_READY)){
+            Log.d(TAG, "onPlayerStateChanged: PAUSED");
+        }
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity() {
+
+    }
+// TODO: 10/06/18 orientation changes
 }
-// TODO: 4/12/2018 Espresso

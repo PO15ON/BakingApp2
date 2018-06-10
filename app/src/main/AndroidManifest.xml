@@ -27,8 +27,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".Main2Activity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:name=".Main2Activity"/>
 
         <receiver android:name=".IngredientsWidget">
             <intent-filter>

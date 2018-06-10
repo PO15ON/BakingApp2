@@ -2,7 +2,6 @@ package com.example.ahmed.bakingapp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +70,8 @@ public class StepDescriptionFragment extends Fragment {
         modelList = MainActivity.modelListAll;
 //        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
 
+
+        setRetainInstance(true);
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -222,24 +222,6 @@ public class StepDescriptionFragment extends Fragment {
         super.onSaveInstanceState(outState);
         if (mExoPlayer != null)
             seekTo = mExoPlayer.getCurrentPosition();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mPlayerView.getLayoutParams();
-
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-
-            mPlayerView.setLayoutParams(params);
-        } else {
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        }
     }
 
 }
