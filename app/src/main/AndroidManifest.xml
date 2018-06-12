@@ -27,7 +27,11 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".Main2Activity"/>
+            android:name=".Main2Activity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".DetailsActivity"/>
+        </activity>
 
         <receiver android:name=".IngredientsWidget">
             <intent-filter>

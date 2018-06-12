@@ -38,6 +38,8 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
 
     private static final String POSITION = "position";
     private static final String TAG = "seekToo";
+    private static final String PLAY_WHEN_READY = "playWhenReady";
+
     @BindView(R.id.player_view)
     SimpleExoPlayerView mPlayerView;
     @BindView(R.id.previous_btn)
@@ -67,9 +69,12 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
 
         seekBundle = new Bundle();
         seekTo = seekBundle.getLong(POSITION, 0);
+        playWhenReady = seekBundle.getBoolean(PLAY_WHEN_READY);
+
         if (savedInstanceState != null) {
             seekTo = savedInstanceState.getLong(POSITION);
             Log.d(TAG, "onCreate: " + seekTo);
+            playWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY);
         }
 
         modelList = MainActivity.modelListAll;
@@ -113,7 +118,6 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
             nextBtn.setVisibility(View.VISIBLE);
             prevBtn.setVisibility(View.VISIBLE);
         }
-        Log.d("buttons", "updateBtns: buttons updated");
     }
 
     @OnClick(R.id.previous_btn)
@@ -126,6 +130,10 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
         descTxt.setText(modelList.get(MainActivity.listId).getSteps().get(stepId).getDescription());
 
         videoUrl = modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL();
+
+        shortDescription = modelList.get(MainActivity.listId).getSteps().get(stepId).getShortDescription();
+
+        setTitle(shortDescription + " - " + name);
         releasePlayer();
         initializePlayer(Uri.parse(videoUrl));
 
@@ -147,6 +155,10 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
         }
         descTxt.setText(description);
 
+        shortDescription = modelList.get(MainActivity.listId).getSteps().get(stepId).getShortDescription();
+
+        setTitle(shortDescription + " - " + name);
+
         releasePlayer();
         initializePlayer(Uri.parse(videoUrl));
 
@@ -155,35 +167,33 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
     @Override
     public void onStart() {
         super.onStart();
-        if (Util.SDK_INT > 23) {
+
             initializePlayer(Uri.parse(videoUrl));
-        }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume: " + seekTo);
-        hideSystemUi();
-        if ((Util.SDK_INT <= 23 || mExoPlayer == null)) {
-            initializePlayer(Uri.parse(videoUrl));
-        }
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        Log.d(TAG, "onResume: " + seekTo);
+//        hideSystemUi();
+//        if ((Util.SDK_INT <= 23 || mExoPlayer == null)) {
+//            initializePlayer(Uri.parse(videoUrl));
+//        }
+//    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (Util.SDK_INT <= 23) {
-            releasePlayer();
-        }
-    }
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//
+//            releasePlayer();
+//
+//    }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (Util.SDK_INT > 23) {
+
             releasePlayer();
-        }
     }
 
     @SuppressLint("InlinedApi")
@@ -224,8 +234,10 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
     private void releasePlayer() {
         if (mExoPlayer != null) {
             seekTo = mExoPlayer.getCurrentPosition();
+            playWhenReady = mExoPlayer.getPlayWhenReady();
             Log.d(TAG, "releasePlayer: " + seekTo);
             seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
+            seekBundle.putBoolean(PLAY_WHEN_READY, mExoPlayer.getPlayWhenReady());
             mExoPlayer.release();
             mExoPlayer = null;
         }
@@ -238,17 +250,20 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
             outState.putLong(POSITION, mExoPlayer.getCurrentPosition());
             Log.d(TAG, "onSaveInstanceState: " + seekTo);
             seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
+            seekBundle.putBoolean(PLAY_WHEN_READY, mExoPlayer.getPlayWhenReady());
+            outState.putBoolean(PLAY_WHEN_READY, mExoPlayer.getPlayWhenReady());
         }
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            seekTo = savedInstanceState.getLong(POSITION);
-            Log.d(TAG, "onRestoreInstanceState: " + seekTo);
-        }
-    }
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            seekTo = savedInstanceState.getLong(POSITION);
+//            playWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY);
+//            Log.d(TAG, "onRestoreInstanceState: " + seekTo);
+//        }
+//    }
 
 
 //    @Override
