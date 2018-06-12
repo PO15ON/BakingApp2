@@ -34,7 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventListener {
+public class Main2Activity extends AppCompatActivity {
 
     private static final String POSITION = "position";
     private static final String TAG = "seekToo";
@@ -56,7 +56,6 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
     int stepId, length, exoIndex;
     long seekTo;
     boolean playWhenReady = true;
-    Bundle seekBundle;
 
     private ArrayList<AbstractModel> modelList;
 
@@ -67,19 +66,14 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
 
         ButterKnife.bind(this);
 
-        seekBundle = new Bundle();
-        seekTo = seekBundle.getLong(POSITION, 0);
-        playWhenReady = seekBundle.getBoolean(PLAY_WHEN_READY);
-
         if (savedInstanceState != null) {
             seekTo = savedInstanceState.getLong(POSITION);
             Log.d(TAG, "onCreate: " + seekTo);
             playWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY);
+            Log.d(PLAY_WHEN_READY, "onCreate(savedInstance): " + playWhenReady);
         }
 
         modelList = MainActivity.modelListAll;
-//        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
-
 
         Bundle bundle = getIntent().getBundleExtra("bundle");
         description = bundle.getString("description");
@@ -91,11 +85,6 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
             videoUrl = bundle.getString("video");
         name = bundle.getString("name");
         length = bundle.getInt("length");
-
-        Log.d("testing", "onCreate: desc = " + description + "\nshort = " + shortDescription +
-                "\nstepId = " + stepId + "\nvideo = " + videoUrl + "\nname = " + name + "\nlength = " + length);
-
-//        Log.d("modelList", "onCreate: modelList = " + modelList.get(MainActivity.listId).getSteps().get(stepId).getVideoURL());
 
         Log.d("video", "onCreate: video = " + videoUrl);
         setTitle(shortDescription + " - " + name);
@@ -171,24 +160,6 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
             initializePlayer(Uri.parse(videoUrl));
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        Log.d(TAG, "onResume: " + seekTo);
-//        hideSystemUi();
-//        if ((Util.SDK_INT <= 23 || mExoPlayer == null)) {
-//            initializePlayer(Uri.parse(videoUrl));
-//        }
-//    }
-
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//
-//            releasePlayer();
-//
-//    }
-
     @Override
     public void onStop() {
         super.onStop();
@@ -220,7 +191,6 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
             mPlayerView.setPlayer(mExoPlayer);
 
-            mExoPlayer.addListener(this);
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(this, "BakingApp");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
@@ -236,8 +206,7 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
             seekTo = mExoPlayer.getCurrentPosition();
             playWhenReady = mExoPlayer.getPlayWhenReady();
             Log.d(TAG, "releasePlayer: " + seekTo);
-            seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
-            seekBundle.putBoolean(PLAY_WHEN_READY, mExoPlayer.getPlayWhenReady());
+            Log.d(PLAY_WHEN_READY, "releasePlayer: " + playWhenReady);
             mExoPlayer.release();
             mExoPlayer = null;
         }
@@ -249,62 +218,9 @@ public class Main2Activity extends AppCompatActivity implements ExoPlayer.EventL
         if (mExoPlayer != null) {
             outState.putLong(POSITION, mExoPlayer.getCurrentPosition());
             Log.d(TAG, "onSaveInstanceState: " + seekTo);
-            seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
-            seekBundle.putBoolean(PLAY_WHEN_READY, mExoPlayer.getPlayWhenReady());
             outState.putBoolean(PLAY_WHEN_READY, mExoPlayer.getPlayWhenReady());
+            Log.d(PLAY_WHEN_READY, "onSaveInstanceState: " + playWhenReady);
         }
     }
 
-//    @Override
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//        if (savedInstanceState != null) {
-//            seekTo = savedInstanceState.getLong(POSITION);
-//            playWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY);
-//            Log.d(TAG, "onRestoreInstanceState: " + seekTo);
-//        }
-//    }
-
-
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        seekBundle.putLong(POSITION, mExoPlayer.getCurrentPosition());
-//        releasePlayer();
-//    }
-
-    @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
-
-    }
-
-    @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-    }
-
-    @Override
-    public void onLoadingChanged(boolean isLoading) {
-
-    }
-
-    @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
-            Log.d(TAG, "onPlayerStateChanged: PLAYING");
-        } else if((playbackState == ExoPlayer.STATE_READY)){
-            Log.d(TAG, "onPlayerStateChanged: PAUSED");
-        }
-    }
-
-    @Override
-    public void onPlayerError(ExoPlaybackException error) {
-
-    }
-
-    @Override
-    public void onPositionDiscontinuity() {
-
-    }
-// TODO: 10/06/18 orientation changes
 }
